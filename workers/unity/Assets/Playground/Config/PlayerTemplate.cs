@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Improbable;
 using Improbable.Gdk.Core;
 using Improbable.Gdk.PlayerLifecycle;
+using Improbable.Gdk.QueryBasedInterest;
 using Improbable.Gdk.TransformSynchronization;
 
 namespace Playground
@@ -25,10 +26,67 @@ namespace Playground
             PlayerLifecycleHelper.AddPlayerLifecycleComponents(template, workerId, clientAttribute,
                 WorkerUtils.UnityGameLogic);
 
-            template.SetReadAccess(WorkerUtils.UnityClient, WorkerUtils.UnityGameLogic, WorkerUtils.AndroidClient, WorkerUtils.iOSClient);
+            template.SetReadAccess(WorkerUtils.UnityClient, WorkerUtils.UnityGameLogic, WorkerUtils.AndroidClient,
+                WorkerUtils.iOSClient);
             template.SetComponentWriteAccess(EntityAcl.ComponentId, WorkerUtils.UnityGameLogic);
 
             return template;
+        }
+
+        private static void MinimapExample()
+        {
+            var playerQuery = InterestQuery
+                .Query(Constraint.All(
+                    Constraint.RelativeSphere(20),
+                    Constraint.Component<PlayerInfo.Component>()))
+                .Filter(Position.ComponentId, PlayerInfo.ComponentId);
+
+            var miniMapQuery = InterestQuery
+                .Query(Constraint.All(
+                    Constraint.RelativeBox(50, double.PositiveInfinity, 50),
+                    Constraint.Component<MinimapRepresentation.Component>()))
+                .Filter(Position.ComponentId, MinimapRepresentation.ComponentId);
+
+            var interest = InterestBuilder.Begin()
+                .AddQueries<PlayerControls.Component>(playerQuery, miniMapQuery)
+                .Build();
+        }
+
+        private static void TeamsExample()
+        {
+            var isblue = true;
+            //some logic to determine which team
+
+            var teamQuery = InterestQuery
+                .Query(Constraint.Component(isblue ? BlueTeam.ComponentId : RedTeam.ComponentId));
+
+            var interest = InterestBuilder.Begin()
+                .AddQuery<PlayerControls.Component>(teamQuery)
+                .Build();
+        }
+
+        private static void FrequencyExample()
+        {
+            var playerQuery = InterestQuery
+                .Query(Constraint.All(
+                    Constraint.RelativeSphere(20),
+                    Constraint.Component<PlayerInfo.Component>()))
+                .MaxFrequencyHz(20)
+                .Filter(Position.ComponentId, PlayerInfo.ComponentId);
+
+            var miniMapQuery = InterestQuery
+                .Query(Constraint.All(
+                    Constraint.RelativeBox(50, double.PositiveInfinity, 50),
+                    Constraint.Component<MinimapRepresentation.Component>()))
+                .MaxFrequencyHz(1)
+                .Filter(Position.ComponentId, MinimapRepresentation.ComponentId);
+
+            var interest = InterestBuilder.Begin()
+                .AddQueries<PlayerControls.Component>(playerQuery, miniMapQuery)
+                .Build();
+
+            var template = new EntityTemplate();
+            template.AddComponent(interest, "blah");
         }
     }
 }
