@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Improbable.Gdk.ReactiveComponents;
 using Improbable.Worker.CInterop;
 using Improbable.Gdk.Subscriptions;
 using Unity.Entities;
@@ -190,24 +191,22 @@ namespace Improbable.Gdk.Core
         private void AddCoreSystems()
         {
             World.CreateManager<WorkerSystem>(Connection, LogDispatcher, WorkerType, Origin);
-            World.GetOrCreateManager<ReactiveComponentSendSystem>();
             World.GetOrCreateManager<ComponentSendSystem>();
             World.GetOrCreateManager<SpatialOSReceiveSystem>();
-            World.GetOrCreateManager<CleanReactiveComponentsSystem>();
-            World.GetOrCreateManager<WorldCommandsCleanSystem>();
-            World.GetOrCreateManager<WorldCommandsSendSystem>();
-            World.GetOrCreateManager<AcknowledgeAuthorityLossSystem>();
+            World.GetOrCreateManager<CleanTemporaryComponentsSystem>();
             World.GetOrCreateManager<CommandSystem>();
             World.GetOrCreateManager<ComponentUpdateSystem>();
             World.GetOrCreateManager<EntitySystem>();
-            World.GetOrCreateManager<ReactiveCommandComponentSystem>();
-            World.GetOrCreateManager<CommandSenderComponentSystem>();
+
+            // Subscriptions systems
             World.GetOrCreateManager<CommandCallbackSystem>();
             World.GetOrCreateManager<ComponentConstraintsCallbackSystem>();
             World.GetOrCreateManager<ComponentCallbackSystem>();
             World.GetOrCreateManager<RequireLifecycleSystem>();
-            World.GetOrCreateManager<ReactiveComponentSystem>();
             World.GetOrCreateManager<SubscriptionSystem>();
+
+            // Reactive components
+            ReactiveComponentsHelper.AddCommonSystems(World);
         }
 
         public void Dispose()
