@@ -10,7 +10,7 @@
 ### Changed
 
 - Upgraded the Worker SDK snapshot version.
-- Updated default Unity version to `2018.3.0f2`.
+- Updated the default Unity version to `2018.3.0f2`.
 
 ### Fixed
 
