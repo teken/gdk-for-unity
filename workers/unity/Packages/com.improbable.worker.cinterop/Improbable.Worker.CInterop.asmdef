@@ -1,14 +1,11 @@
 {
-    "name": "Improbable.Gdk.Core",
+    "name": "Improbable.Worker.CInterop",
     "references": [
-        "Unity.Entities",
-        "Unity.Entities.Hybrid",
-        "Unity.Mathematics"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],
     "excludePlatforms": [],
-    "allowUnsafeCode": false,
+    "allowUnsafeCode": true,
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,

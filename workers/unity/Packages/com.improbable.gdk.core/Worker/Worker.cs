@@ -88,7 +88,14 @@ namespace Improbable.Gdk.Core
             ILogDispatcher logger,
             Vector3 origin)
         {
-            var connection = await Task.Run(() => connectionFuture.Get());
+            var connection = connectionFuture.Get();
+            if (connection == null)
+            {
+                throw new ConnectionFailedException("Connection future returned null.",
+                    ConnectionErrorReason.CannotEstablishConnection);
+            }
+
+            // var connection = await Task.Run(() => connectionFuture.Get());
             if (!connection.IsConnected)
             {
                 throw new ConnectionFailedException(GetConnectionFailureReason(connection),
@@ -118,7 +125,7 @@ namespace Improbable.Gdk.Core
         /// <param name="origin">The origin of this worker in the local Unity space.</param>
         /// <returns>A <see cref="Task{TResult}"/> to run this method asynchronously and retrieve the created <see cref="Worker"/> object upon connecting successfully.</returns>
         public static async Task<Worker> CreateWorkerAsync(
-            ReceptionistConfig config, 
+            ReceptionistConfig config,
             ConnectionParameters connectionParameters,
             ILogDispatcher logger, Vector3 origin)
         {
