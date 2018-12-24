@@ -88,14 +88,7 @@ namespace Improbable.Gdk.Core
             ILogDispatcher logger,
             Vector3 origin)
         {
-            var connection = connectionFuture.Get();
-            if (connection == null)
-            {
-                throw new ConnectionFailedException("Connection future returned null.",
-                    ConnectionErrorReason.CannotEstablishConnection);
-            }
-
-            // var connection = await Task.Run(() => connectionFuture.Get());
+            var connection = await Task.Run(() => connectionFuture.Get());
             if (!connection.IsConnected)
             {
                 throw new ConnectionFailedException(GetConnectionFailureReason(connection),
