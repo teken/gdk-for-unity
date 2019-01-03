@@ -2,11 +2,13 @@ using System;
 using System.Collections.Generic;
 using Improbable.Gdk.Core;
 
-namespace Improbable.Gdk.Mobile.Android
+namespace Improbable.Gdk.Mobile
 {
     public static class LaunchArguments
     {
-        public static Dictionary<string, string> GetArguments()
+        private const string LaunchArgumentsEnvKey = "SPATIALOS_ARGUMENTS";
+
+        public static Dictionary<string, string> GetAndroidArguments()
         {
             try
             {
@@ -30,7 +32,25 @@ namespace Improbable.Gdk.Mobile.Android
                 UnityEngine.Debug.LogException(e);
             }
 
-            return new Dictionary<string, string>();
+            return null;
+        }
+
+        public static Dictionary<string, string> GetiOSArguments()
+        {
+            try
+            {
+                var argumentsEnvVar = System.Environment.GetEnvironmentVariable(LaunchArgumentsEnvKey);
+                if (argumentsEnvVar != null)
+                {
+                    return CommandLineUtility.ParseCommandLineArgs(argumentsEnvVar.Split(' '));
+                }
+            }
+            catch (Exception e)
+            {
+                UnityEngine.Debug.LogException(e);
+            }
+
+            return null;
         }
     }
 }
