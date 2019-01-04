@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Improbable.Gdk.Core;
 using Improbable.Gdk.Tools;
@@ -13,8 +14,8 @@ namespace Improbable.Gdk.Mobile
     {
         private const string rootApkPath = "build";
         private static string AbsoluteAppBuildPath => Path.GetFullPath(Path.Combine(Application.dataPath, Path.Combine("..", rootApkPath)));
-        public static string IDeviceInstallerBinary => Common.DiscoverLocation("ideviceinstaller");
-        public static string IDeviceDebugBinary => Common.DiscoverLocation("idevicedebug");
+        private static string LibIDeviceInstallerBinary => Common.DiscoverLocation("ideviceinstaller");
+        private static string LibIDeviceDebugBinary => Common.DiscoverLocation("idevicedebug");
 
         private const string MenuLaunchAndroid = "SpatialOS/Launch mobile client/Android Device";
         private const string MenuLaunchiOSDevice = "SpatialOS/Launch mobile client/iOS Device";
@@ -37,7 +38,7 @@ namespace Improbable.Gdk.Mobile
                 EditorUtility.DisplayProgressBar("Launching Android Client", "Installing APK", 0.3f);
 
                 // Find apk to install
-                var apkPath = TryGetArchivePath(AbsoluteAppBuildPath, "*.apk");
+                var apkPath = Directory.GetFiles(AbsoluteAppBuildPath, "*.apk", SearchOption.AllDirectories).FirstOrDefault();
                 if (apkPath == string.Empty)
                 {
                     Debug.LogError($"Could not find a built out Android binary in \"{AbsoluteAppBuildPath}\" to launch.");
@@ -70,8 +71,6 @@ namespace Improbable.Gdk.Mobile
                 RedirectedProcess.Run(adbPath, "shell", "am", "start", "-S",
                     "-n", $"{bundleId}/com.unity3d.player.UnityPlayerActivity",
                     "-e", "\"arguments\"", $"\\\"{arguments.ToString()}\\\"");
-
-                EditorUtility.DisplayProgressBar("Launching Android Client", "Done", 1.0f);
             }
             finally
             {
@@ -84,29 +83,32 @@ namespace Improbable.Gdk.Mobile
         {
             try
             {
-                if (IDeviceInstallerBinary == string.Empty)
+                // Ensure needed tools are installed
+                if (string.IsNullOrEmpty(LibIDeviceInstallerBinary))
                 {
-                    Debug.LogError("Could not find ideviceinstaller tool. Please ensure it is installed.");
+                    Debug.LogError("Could not find ideviceinstaller tool. Please ensure it is installed." +
+                        "See https://github.com/libimobiledevice/ideviceinstaller fore more details.");
                     return;
                 }
 
-                if (IDeviceDebugBinary == string.Empty)
+                if (string.IsNullOrEmpty(LibIDeviceDebugBinary))
                 {
-                    Debug.LogError("Could not find idevicedebug tool. Please ensure libimobiledevice is installed.");
+                    Debug.LogError("Could not find idevicedebug tool. Please ensure libimobiledevice is installed." +
+                        "See https://helpmanual.io/help/idevicedebug/ for more details.");
                     return;
                 }
 
                 EditorUtility.DisplayProgressBar("Launching iOS Device Client", "Installing archive", 0.3f);
 
                 // Find archive to install
-                var ipaPath = TryGetArchivePath(AbsoluteAppBuildPath, "*.ipa");
-                if (ipaPath == string.Empty)
+                var ipaPath = Directory.GetFiles(AbsoluteAppBuildPath, "*.ipa", SearchOption.AllDirectories).FirstOrDefault();
+                if (string.IsNullOrEmpty(ipaPath))
                 {
                     Debug.LogError($"Could not find a built out iOS archive in \"{AbsoluteAppBuildPath}\" to launch.");
                     return;
                 }
 
-                if (RedirectedProcess.Run(IDeviceInstallerBinary, "-i", ipaPath) != 0)
+                if (RedirectedProcess.Run(LibIDeviceInstallerBinary, "-i", ipaPath) != 0)
                 {
                     Debug.LogError("Error while installing archive to the device. Please check the log for details about the error.");
                     return;
@@ -114,7 +116,7 @@ namespace Improbable.Gdk.Mobile
 
                 EditorUtility.DisplayProgressBar("Launching iOS Device Client", "Launching Client", 0.9f);
 
-                // Get chosen android package id and launch
+                // Get chosen ios package id and launch
                 var bundleId = PlayerSettings.GetApplicationIdentifier(BuildTargetGroup.Android);
 
                 // Optional arguments to be passed, same as standalone
@@ -127,8 +129,6 @@ namespace Improbable.Gdk.Mobile
                 }
 
                 StartiOSDeviceProcess(arguments.ToString(), bundleId);
-
-                EditorUtility.DisplayProgressBar("Launching iOS Device Client", "Done", 1.0f);
             }
             finally
             {
@@ -136,19 +136,9 @@ namespace Improbable.Gdk.Mobile
             }
         }
 
-        private static string TryGetArchivePath(string rootPath, string archivePattern)
-        {
-            foreach (var file in Directory.GetFiles(rootPath, archivePattern, SearchOption.AllDirectories))
-            {
-                return file;
-            }
-
-            return string.Empty;
-        }
-
         private static void StartiOSDeviceProcess(string arguments, string bundleId)
         {
-            var processInfo = new ProcessStartInfo(IDeviceDebugBinary, $"{arguments} run {bundleId}")
+            var processInfo = new ProcessStartInfo(LibIDeviceDebugBinary, $"{arguments} run {bundleId}")
             {
                 CreateNoWindow = false,
                 RedirectStandardError = true,
@@ -189,7 +179,6 @@ namespace Improbable.Gdk.Mobile
             process.Exited += (sender, args) =>
             {
                 process.Dispose();
-                process = null;
             };
         }
     }
