@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -12,13 +14,14 @@ namespace Improbable.Gdk.Mobile
 {
     public static class LaunchMenu
     {
-        private const string rootBuildPath = "build";
-        private static string AbsoluteAppBuildPath => Path.GetFullPath(Path.Combine(Application.dataPath, Path.Combine("..", rootBuildPath)));
+        private const string RootBuildPath = "build";
+        private static string AbsoluteAppBuildPath => Path.GetFullPath(Path.Combine(Application.dataPath, Path.Combine("..", RootBuildPath)));
         private static string LibIDeviceInstallerBinary => Common.DiscoverLocation("ideviceinstaller");
         private static string LibIDeviceDebugBinary => Common.DiscoverLocation("idevicedebug");
 
         private const string MenuLaunchAndroid = "SpatialOS/Launch mobile client/Android Device";
         private const string MenuLaunchiOSDevice = "SpatialOS/Launch mobile client/iOS Device";
+        private const string MenuLaunchiOSSimulator = "SpatialOS/Launch mobile client/iOS Simulator";
 
         [MenuItem(MenuLaunchAndroid, false, 73)]
         private static void LaunchAndroidClient()
@@ -134,6 +137,119 @@ namespace Improbable.Gdk.Mobile
             {
                 EditorUtility.ClearProgressBar();
             }
+        }
+
+        [MenuItem(MenuLaunchiOSSimulator, false, 75)]
+        private static void LaunchiOSSimulatorClient()
+        {
+            try
+            {
+                EditorUtility.DisplayProgressBar("Launching iOS Simulator Client", "Launching iOS simulator", 0.2f);
+
+                // Open iOS simulator if it is not yet open
+                var xcodePath = GetXCodePath();
+                if (string.IsNullOrEmpty(xcodePath))
+                {
+                    Debug.LogError("Couldn't run xcode-select. Please make sure XCode is installed");
+                    return;
+                }
+
+                RedirectedProcess.Run("open", $"{xcodePath}/Applications/Simulator.app/");
+
+                EditorUtility.DisplayProgressBar("Launching iOS Simulator Client", "Installing client app", 0.5f);
+
+                // Find a built app to install
+                var bundleId = PlayerSettings.GetApplicationIdentifier(BuildTargetGroup.iOS);
+                var bundleName = bundleId.Split('.').LastOrDefault();
+                var appPath = Directory.GetDirectories(AbsoluteAppBuildPath, $"{bundleName}.app", SearchOption.AllDirectories).FirstOrDefault();
+                if (string.IsNullOrEmpty(appPath))
+                {
+                    Debug.LogError($"Could not find a built out iOS app in \"{AbsoluteAppBuildPath}\" to launch.");
+                    return;
+                }
+
+                // iOS simulator might not have finished starting at this point, so we want to give it some time
+                DateTime timeout = DateTime.Now.AddSeconds(30);
+                while (RedirectedProcess.Run("xcrun", $"simctl install booted {appPath}") != 0)
+                {
+                    if (DateTime.Now > timeout)
+                    {
+                        Debug.LogError("Error while installing app to the simulator. Please check the log for details about the error.");
+                    }
+
+                    System.Threading.Thread.Sleep(1000);
+                }
+
+                EditorUtility.DisplayProgressBar("Launching iOS Simulator Client", "Launching Client app", 0.8f);
+
+                // Optional arguments to be passed, same as standalone
+                // Use this to pass through the local ip to connect to
+                var runtimeIp = GdkToolsConfiguration.GetOrCreateInstance().RuntimeIp;
+                var arguments = new StringBuilder();
+                if (!string.IsNullOrEmpty(runtimeIp))
+                {
+                    arguments.Append($"+{RuntimeConfigNames.ReceptionistHost} {runtimeIp}");
+                }
+
+                var envVars = new Dictionary<string, string>
+                {
+                    { $"SIMCTL_CHILD_SPATIALOS_ARGUMENTS", arguments.ToString() }
+                };
+                if (RedirectedProcess.RunWithEnvVars(Path.GetFullPath(Path.Combine(Application.dataPath, "..")),
+                    "xcrun", envVars, "simctl", "launch", "booted", bundleId) != 0)
+                {
+                    Debug.LogError("Error while launching app on the simulator. Please check the log for details about the error.");
+                }
+            }
+            finally
+            {
+                EditorUtility.ClearProgressBar();
+            }
+        }
+
+        private static string GetXCodePath()
+        {
+            var processInfo = new ProcessStartInfo("xcode-select", "-p")
+            {
+                CreateNoWindow = true,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+            };
+
+            var processOutput = new StringBuilder();
+
+            using (var process = Process.Start(processInfo))
+            {
+                if (process == null)
+                {
+                    return null;
+                }
+
+                void OnReceived(object sender, DataReceivedEventArgs args)
+                {
+                    if (string.IsNullOrEmpty(args.Data))
+                    {
+                        return;
+                    }
+
+                    lock (processOutput)
+                    {
+                        processOutput.AppendLine(args.Data);
+                    }
+                }
+
+                process.OutputDataReceived += OnReceived;
+                process.ErrorDataReceived += OnReceived;
+
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+
+                process.EnableRaisingEvents = true;
+                process.WaitForExit();
+            }
+
+            return processOutput.ToString().Trim();
         }
 
         private static void StartiOSDeviceProcess(string arguments, string bundleId)

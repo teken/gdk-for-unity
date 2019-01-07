@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -34,6 +35,19 @@ namespace Improbable.Gdk.Tools
         /// <returns>The exit code.</returns>
         public static int RunIn(string workingDirectory, string command, params string[] arguments)
         {
+            return RunWithEnvVars(workingDirectory, command, new Dictionary<string, string>(), arguments);
+        }
+
+        /// <summary>
+        ///     Runs the redirected process and waits for it to return.
+        /// </summary>
+        /// <param name="workingDirectory">The directory to run the filename from.</param>
+        /// <param name="command">The filename to run.</param>
+        /// <param name="envVars">Dictionary containing environment variables to be used.</param>
+        /// <param name="arguments">Parameters that will be passed to the command.</param>
+        /// <returns>The exit code.</returns>
+        public static int RunWithEnvVars(string workingDirectory, string command, Dictionary<string, string> envVars, params string[] arguments)
+        {
             var info = new ProcessStartInfo(command, string.Join(" ", arguments))
             {
                 CreateNoWindow = true,
@@ -42,6 +56,11 @@ namespace Improbable.Gdk.Tools
                 UseShellExecute = false,
                 WorkingDirectory = workingDirectory
             };
+
+            foreach (var envVar in envVars.Keys)
+            {
+                info.EnvironmentVariables.Add(envVar, envVars[envVar]);
+            }
 
             using (var process = Process.Start(info))
             {
