@@ -12,8 +12,8 @@ namespace Improbable.Gdk.Mobile
 {
     public static class LaunchMenu
     {
-        private const string rootApkPath = "build";
-        private static string AbsoluteAppBuildPath => Path.GetFullPath(Path.Combine(Application.dataPath, Path.Combine("..", rootApkPath)));
+        private const string rootBuildPath = "build";
+        private static string AbsoluteAppBuildPath => Path.GetFullPath(Path.Combine(Application.dataPath, Path.Combine("..", rootBuildPath)));
         private static string LibIDeviceInstallerBinary => Common.DiscoverLocation("ideviceinstaller");
         private static string LibIDeviceDebugBinary => Common.DiscoverLocation("idevicedebug");
 
@@ -86,14 +86,14 @@ namespace Improbable.Gdk.Mobile
                 // Ensure needed tools are installed
                 if (string.IsNullOrEmpty(LibIDeviceInstallerBinary))
                 {
-                    Debug.LogError("Could not find ideviceinstaller tool. Please ensure it is installed." +
+                    Debug.LogError("Could not find ideviceinstaller tool. Please ensure it is installed. " +
                         "See https://github.com/libimobiledevice/ideviceinstaller fore more details.");
                     return;
                 }
 
                 if (string.IsNullOrEmpty(LibIDeviceDebugBinary))
                 {
-                    Debug.LogError("Could not find idevicedebug tool. Please ensure libimobiledevice is installed." +
+                    Debug.LogError("Could not find idevicedebug tool. Please ensure libimobiledevice is installed. " +
                         "See https://helpmanual.io/help/idevicedebug/ for more details.");
                     return;
                 }
@@ -117,7 +117,7 @@ namespace Improbable.Gdk.Mobile
                 EditorUtility.DisplayProgressBar("Launching iOS Device Client", "Launching Client", 0.9f);
 
                 // Get chosen ios package id and launch
-                var bundleId = PlayerSettings.GetApplicationIdentifier(BuildTargetGroup.Android);
+                var bundleId = PlayerSettings.GetApplicationIdentifier(BuildTargetGroup.iOS);
 
                 // Optional arguments to be passed, same as standalone
                 // Use this to pass through the local ip to connect to
@@ -140,14 +140,12 @@ namespace Improbable.Gdk.Mobile
         {
             var processInfo = new ProcessStartInfo(LibIDeviceDebugBinary, $"{arguments} run {bundleId}")
             {
-                CreateNoWindow = false,
+                CreateNoWindow = true,
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
                 WorkingDirectory = AbsoluteAppBuildPath
             };
-
-            var processOutput = new StringBuilder();
 
             void OnReceived(object sender, DataReceivedEventArgs args)
             {
@@ -156,10 +154,7 @@ namespace Improbable.Gdk.Mobile
                     return;
                 }
 
-                lock (processOutput)
-                {
-                    Debug.Log(args.Data.Trim());
-                }
+                Debug.Log(args.Data.Trim());
             }
 
             var process = Process.Start(processInfo);
