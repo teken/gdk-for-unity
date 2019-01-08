@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -131,7 +130,7 @@ namespace Improbable.Gdk.Mobile
                     arguments.Append($"-e SPATIALOS_ARGUMENTS=\"+{RuntimeConfigNames.ReceptionistHost} {runtimeIp}\"");
                 }
 
-                StartiOSDeviceProcess(arguments.ToString(), bundleId);
+                RedirectedProcess.RunWithImmediateOutput(LibIDeviceDebugBinary, arguments.ToString(), "run", bundleId);
             }
             finally
             {
@@ -147,7 +146,7 @@ namespace Improbable.Gdk.Mobile
                 EditorUtility.DisplayProgressBar("Launching iOS Simulator Client", "Launching iOS simulator", 0.2f);
 
                 // Open iOS simulator if it is not yet open
-                var xcodePath = GetXCodePath();
+                RedirectedProcess.RunExtractOutput("xcode-select", out var xcodePath, "-p");
                 if (string.IsNullOrEmpty(xcodePath))
                 {
                     Debug.LogError("Couldn't run xcode-select. Please make sure XCode is installed");
@@ -170,7 +169,7 @@ namespace Improbable.Gdk.Mobile
 
                 // iOS simulator might not have finished starting at this point, so we want to give it some time
                 DateTime timeout = DateTime.Now.AddSeconds(30);
-                while (RedirectedProcess.Run("xcrun", $"simctl install booted {appPath}") != 0)
+                while (RedirectedProcess.Run("xcrun", "simctl", "install", "booted", appPath) != 0)
                 {
                     if (DateTime.Now > timeout)
                     {
@@ -195,8 +194,7 @@ namespace Improbable.Gdk.Mobile
                 {
                     { $"SIMCTL_CHILD_SPATIALOS_ARGUMENTS", arguments.ToString() }
                 };
-                if (RedirectedProcess.RunWithEnvVars(Path.GetFullPath(Path.Combine(Application.dataPath, "..")),
-                    "xcrun", envVars, "simctl", "launch", "booted", bundleId) != 0)
+                if (RedirectedProcess.RunWithEnvVars("xcrun", envVars, "simctl", "launch", "booted", bundleId) != 0)
                 {
                     Debug.LogError("Error while launching app on the simulator. Please check the log for details about the error.");
                 }
@@ -205,92 +203,6 @@ namespace Improbable.Gdk.Mobile
             {
                 EditorUtility.ClearProgressBar();
             }
-        }
-
-        private static string GetXCodePath()
-        {
-            var processInfo = new ProcessStartInfo("xcode-select", "-p")
-            {
-                CreateNoWindow = true,
-                RedirectStandardError = true,
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-            };
-
-            var processOutput = new StringBuilder();
-
-            using (var process = Process.Start(processInfo))
-            {
-                if (process == null)
-                {
-                    return null;
-                }
-
-                void OnReceived(object sender, DataReceivedEventArgs args)
-                {
-                    if (string.IsNullOrEmpty(args.Data))
-                    {
-                        return;
-                    }
-
-                    lock (processOutput)
-                    {
-                        processOutput.AppendLine(args.Data);
-                    }
-                }
-
-                process.OutputDataReceived += OnReceived;
-                process.ErrorDataReceived += OnReceived;
-
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
-
-                process.EnableRaisingEvents = true;
-                process.WaitForExit();
-            }
-
-            return processOutput.ToString().Trim();
-        }
-
-        private static void StartiOSDeviceProcess(string arguments, string bundleId)
-        {
-            var processInfo = new ProcessStartInfo(LibIDeviceDebugBinary, $"{arguments} run {bundleId}")
-            {
-                CreateNoWindow = true,
-                RedirectStandardError = true,
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-                WorkingDirectory = AbsoluteAppBuildPath
-            };
-
-            void OnReceived(object sender, DataReceivedEventArgs args)
-            {
-                if (string.IsNullOrEmpty(args.Data))
-                {
-                    return;
-                }
-
-                Debug.Log(args.Data.Trim());
-            }
-
-            var process = Process.Start(processInfo);
-            if (process == null)
-            {
-                Debug.LogError("Failed to start SpatialOS locally.");
-                return;
-            }
-
-            process.OutputDataReceived += OnReceived;
-            process.ErrorDataReceived += OnReceived;
-
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
-
-            process.EnableRaisingEvents = true;
-            process.Exited += (sender, args) =>
-            {
-                process.Dispose();
-            };
         }
     }
 }
