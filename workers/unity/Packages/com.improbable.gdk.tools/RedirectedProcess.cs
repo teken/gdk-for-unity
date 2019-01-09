@@ -48,7 +48,7 @@ namespace Improbable.Gdk.Tools
                 }
             }
 
-            var exitCode = RunRedirectedProcess(workingDirectory, command, null, ProcessOutput, arguments);
+            var exitCode = RunRedirectedProcess(workingDirectory, command, null, ProcessOutput, true, arguments);
 
             var trimmedOutput = processOutput.ToString().Trim();
 
@@ -88,7 +88,7 @@ namespace Improbable.Gdk.Tools
                 }
             }
 
-            var exitCode = RunRedirectedProcess(AppDataPath, command, null, ProcessOutput, arguments);
+            var exitCode = RunRedirectedProcess(AppDataPath, command, null, ProcessOutput, true, arguments);
 
             output = processOutput.ToString().Trim();
             return exitCode;
@@ -126,7 +126,7 @@ namespace Improbable.Gdk.Tools
                 }
             }
 
-            return RunRedirectedProcess(AppDataPath, command, envVars, ProcessOutput, arguments);
+            return RunRedirectedProcess(AppDataPath, command, envVars, ProcessOutput, false, arguments);
         }
 
         /// <summary>
@@ -139,7 +139,7 @@ namespace Improbable.Gdk.Tools
         /// <param name="arguments">Parameters that will be passed to the command.</param>
         /// <returns>The exit code.</returns>
         private static int RunRedirectedProcess(string workingDirectory, string command, Dictionary<string, string> envVars,
-            Action<string> outputProcessor, params string[] arguments)
+            Action<string> outputProcessor, bool waitForExit, params string[] arguments)
         {
             var info = new ProcessStartInfo(command, string.Join(" ", arguments))
             {
@@ -181,8 +181,12 @@ namespace Improbable.Gdk.Tools
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
 
-                process.WaitForExit();
+                if (!waitForExit)
+                {
+                    return 0;
+                }
 
+                process.WaitForExit();
                 return process.ExitCode;
             }
         }
