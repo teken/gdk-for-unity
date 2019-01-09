@@ -155,25 +155,20 @@ namespace Improbable.Gdk.Mobile
 
                 RedirectedProcess.Run("open", $"{xcodePath}/Applications/Simulator.app/");
 
-                EditorUtility.DisplayProgressBar("Launching iOS Simulator Client", "Installing client app", 0.5f);
+                EditorUtility.DisplayProgressBar("Launching iOS Simulator Client", "Looking for client app", 0.5f);
 
                 // Find a built app to install
                 var bundleId = PlayerSettings.GetApplicationIdentifier(BuildTargetGroup.iOS);
-                var bundleName = bundleId.Split('.').LastOrDefault();
-                var appPath = Directory.GetDirectories(AbsoluteAppBuildPath, $"{bundleName}.app", SearchOption.AllDirectories).FirstOrDefault();
-                if (string.IsNullOrEmpty(appPath))
-                {
-                    Debug.LogError($"Could not find a built out iOS app in \"{AbsoluteAppBuildPath}\" to launch.");
-                    return;
-                }
 
                 // iOS simulator might not have finished starting at this point, so we want to give it some time
                 DateTime timeout = DateTime.Now.AddSeconds(30);
-                while (RedirectedProcess.Run("xcrun", "simctl", "install", "booted", appPath) != 0)
+                while (RedirectedProcess.RunExtractOutput("xcrun", out _,
+                    "simctl", "get_app_container", "booted", bundleId) != 0)
                 {
                     if (DateTime.Now > timeout)
                     {
-                        Debug.LogError("Error while installing app to the simulator. Please check the log for details about the error.");
+                        Debug.LogError($"Could not find a built out iOS app on running simulator to launch. Please ensure the app is built and installed");
+                        return;
                     }
 
                     System.Threading.Thread.Sleep(1000);

@@ -119,7 +119,11 @@ namespace Improbable.Gdk.Tools
         {
             void ProcessOutput(string output)
             {
-                Debug.Log(output.Trim());
+                output = output.Trim();
+                if (!string.IsNullOrEmpty(output))
+                {
+                    Debug.Log(output);
+                }
             }
 
             return RunRedirectedProcess(AppDataPath, command, envVars, ProcessOutput, arguments);
