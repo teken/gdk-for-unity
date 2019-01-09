@@ -19,8 +19,7 @@ namespace Improbable.Gdk.Mobile
         private static string LibIDeviceDebugBinary => Common.DiscoverLocation("idevicedebug");
 
         private const string MenuLaunchAndroid = "SpatialOS/Launch mobile client/Android Device";
-        private const string MenuLaunchiOSDevice = "SpatialOS/Launch mobile client/iOS Device";
-        private const string MenuLaunchiOSSimulator = "SpatialOS/Launch mobile client/iOS Simulator";
+        private const string MenuLaunchiOSClient = "SpatialOS/Launch mobile client/iOS Client";
 
         [MenuItem(MenuLaunchAndroid, false, 73)]
         private static void LaunchAndroidClient()
@@ -80,7 +79,19 @@ namespace Improbable.Gdk.Mobile
             }
         }
 
-        [MenuItem(MenuLaunchiOSDevice, false, 74)]
+        [MenuItem(MenuLaunchiOSClient, false, 74)]
+        private static void LaunchiOSClient()
+        {
+            if (PlayerSettings.iOS.sdkVersion == iOSSdkVersion.DeviceSDK)
+            {
+                LaunchiOSDeviceClient();
+            }
+            else
+            {
+                LaunchiOSSimulatorClient();
+            }
+        }
+
         private static void LaunchiOSDeviceClient()
         {
             try
@@ -138,7 +149,6 @@ namespace Improbable.Gdk.Mobile
             }
         }
 
-        [MenuItem(MenuLaunchiOSSimulator, false, 75)]
         private static void LaunchiOSSimulatorClient()
         {
             try
