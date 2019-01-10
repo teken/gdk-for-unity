@@ -6,6 +6,7 @@
 
 - Added support for the Steam authentication flow.
 - Added support for the Alpha Locator flow.
+- Added `Launch Mobile client` menu to `SpatialOS` menu in Unity Editor. `Android client` and `iOS client` menu items allow launching corresponding mobile clients to connect to local deployment.
 
 ### Changed
 

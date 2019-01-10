@@ -18,7 +18,7 @@ namespace Improbable.Gdk.Mobile
         private static string LibIDeviceInstallerBinary => Common.DiscoverLocation("ideviceinstaller");
         private static string LibIDeviceDebugBinary => Common.DiscoverLocation("idevicedebug");
 
-        private const string MenuLaunchAndroid = "SpatialOS/Launch mobile client/Android Device";
+        private const string MenuLaunchAndroid = "SpatialOS/Launch mobile client/Android Client";
         private const string MenuLaunchiOSClient = "SpatialOS/Launch mobile client/iOS Client";
 
         [MenuItem(MenuLaunchAndroid, false, 73)]
