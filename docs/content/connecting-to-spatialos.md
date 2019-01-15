@@ -30,39 +30,12 @@ Use the Receptionist service connection flow in the following cases:
 **Note:** You usually connect client-workers to a cloud deployment via the Locator connection flow (outlined below) but you may want to use the Receptionist connection flow for debugging from your Unity Editor. In this case you use the Receptionist service connection flow via `spatial cloud connect external <deploymentname>`. See the SpatialOS documentation to find out more about [`spatial cloud connect external <deploymentname>`](https://docs.improbable.io/reference/13.3/shared/spatial-cli/spatial-cloud-connect-external#spatial-cloud-connect-externall).
 
 ### Locator connection flow
-Use the Locator service connection flow
+Use the Locator service connection flow for
   * Connecting a client-worker to a cloud deployment via the SpatialOS Launcher - [see SpatialOS documentation on the Launcher](https://docs.improbable.io/reference/latest/shared/operate/launcher#the-launcher).
 
-## How do I connect via the Receptionist service flow?
-
-To connect via the Receptionist service connection flow, you need to pass in a `ReceptionistConfig` object when you call `Worker.CreateWorkerAsync` to create your worker.
-
-The `ReceptionistConfig` class stores the following fields:
-
-| Field         	| Type 	| Description                        	|
-|-------------------|----------|--------------------------------------|
-| LinkProtocol| [NetworkConnectionType](https://docs.improbable.io/reference/latest/csharpsdk/api-reference#improbable-worker-networkconnectiontype-enum) | The type of networking to use (either TCP or [Raknet (Wikipedia link)](https://en.wikipedia.org/wiki/RakNet)). The default is Raknet. |
-| ReceptionistHost| string | The host for connecting to the SpatialOS  [Runtime]({{urlRoot}}/content/glossary#spatialos-runtime) using the Receptionist service. The default is `127.0.0.1`. |
-| ReceptionistPort| ushort | The port for connecting to the SpatialOS Runtime using the Receptionist service. The default is `7777`. |
-| EnableProtocolLoggingAtStartup| bool | Specifies whether to enable [protocol logging](#what-is-protocol-logging). The default is `false`. |
-| UseExternalIp| bool | If enabled, the worker won’t use the local IP to connect to the SpatialOS Runtime via the Receptionist service. You only need this when connecting client-workers to cloud deployments using the Receptionist service. The default is `false`. |
-| WorkerId| string | The unique ID of the worker. |
-| WorkerType| string | The type of the worker. |
-
-## How to connect via the Locator service flow
-
-To connect via the Locator service flow, you need to pass in a `LocatorConfig`  when calling `Worker.CreateWorkerAsync` to create your worker.
-The `LocatorConfig` class stores the following fields:
-
-| Field         	| Type 	| Description                        	|
-|-------------------|----------|--------------------------------------|
-| LinkProtocol| [NetworkConnectionType](https://docs.improbable.io/reference/latest/csharpsdk/api-reference#improbable-worker-networkconnectiontype-enum) | The type of networking that should be used (either TCP or [Raknet - Wikipedia link](https://en.wikipedia.org/wiki/RakNet)). The default is Raknet. |
-| LocatorHost| string | The host for connecting to the SpatialOS  [Runtime]({{urlRoot}}/content/glossary#spatialos-runtime) using the Locator flow. The default is `locator.improbable.io`. You usually don’t need to change this. |
-| LocatorParameters| [LocatorParameters](https://docs.improbable.io/reference/latest/csharpsdk/api-reference#improbable-worker-locatorparameters-class) | The parameters needed to connect using the Locator service flow. |
-| EnableProtocolLoggingAtStartup| bool | Specifies whether to enable [protocol logging](#what-is-protocol-logging). The default is `false`.  |
-| UseExternalIp| bool | If enabled, the worker won’t use the local IP to connect to the SpatialOS Runtime via the Receptionist service. You only need this when connecting client-workers to cloud deployments using the Receptionist service. The default is `true`. |
-| WorkerId| string | The unique ID of the worker. |
-| WorkerType| string| The [type of the worker]({{urlRoot}}/content/glossary#worker-types) |
+### Alpha Locator connection flow
+Use the Alpha Locator service connection flow for
+  * Connecting a worker to a cloud deployment via the [SpatialOS Launcher](https://docs.improbable.io/reference/latest/shared/operate/launcher#the-launcher) or [the development authentication flow](https://docs.improbable.io/reference/13.5/shared/auth/development-authentication).
 
 ## When to use the `Connection` object
 Upon successfully connecting to the SpatialOS Runtime, your worker stores a `Connection` object.

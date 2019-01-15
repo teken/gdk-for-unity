@@ -5,33 +5,35 @@ _This document relates to the [MonoBehaviour workflow]({{urlRoot}}/content/intro
 
 See first the documentation on:
 
-* [Workers in the GDK]({{urlRoot}}/content/workers/workers-in-the-gdk)  
+* [Workers in the GDK]({{urlRoot}}/content/workers/workers-in-the-gdk)
 * [Worker API]({{urlRoot}}/content/workers/api-worker)
 
-To demonstrate use of the `Worker` class, the GDK contains an example implementation
-of how to create a `Worker` object and connect to SpatialOS. We provide an abstract `WorkerConnector` class and a `DefaultWorkerConnector` implementing the abstract methods to get you started quickly. You can extend it further by creating classes which inherit from it. 
+To demonstrate the use of the `Worker` class, the GDK contains an example implementation
+of how to create a `Worker` object and connect to SpatialOS. We provide an abstract `WorkerConnector` class and a `DefaultWorkerConnector` implementing the abstract methods to get you started quickly. You can extend it further by creating classes which inherit from it.
 The `WorkerConnector` is a MonoBehaviour script. You can use it to create multiple workers
 in one Scene by adding it to multiple GameObjects, each GameObject creating a different worker.
 
-When you have multiple workers represented as GameObjects in a scene, you are likely to have multiple ECS entities [checked out]({{urlRoot}}/content/glossary#authority) to that worker. To make sure you don’t have all the ECS entities which are checked out to a worker/GameObject in the same (x, y, z) location, we use an offset for each ECS entity against the origin of the worker/GameObject.  We call the offset of the worker/GameObject origin, the “translation”.
+When you have multiple workers represented as GameObjects in a Scene, you are likely to have multiple ECS entities [checked out]({{urlRoot}}/content/glossary#authority) to that worker. To make sure you don’t have all the ECS entities which are checked out to a worker/GameObject in the same (x, y, z) location, we use an offset for each ECS entity against the origin of the worker/GameObject.  We call the offset of the worker/GameObject origin, the “translation”.
 
 
 ## How to use worker prefabs
 
-In the GDK’s [`Playground` project](https://github.com/spatialos/gdk-for-unity/tree/master/workers/unity/Assets/Playground), we provide
+In the GDK’s [Blank project](https://github.com/spatialos/gdk-for-unity-blank-project), we provide
 an example implementation of a client-worker and a server-worker connecting using the `WorkerConnector`.
-These are stored as prefabs, so that you can use them directly in your Scenes.
-The prefabs are stored inside `Playground/Resources/Prefabs/Worker`:
+These scripts are stored inside `workers/unity/Assets/Scripts/Workers`:
 
-  * `ClientWorker`: This prefab has the `ClientWorkerConnector` attached to it. This is a sample implementation to connect as a client-worker. (Note that the client-worker is sometimes called `UnityClient`.)
-  * `GameLogicWorker`: This prefab has the `GameLogicWorkerConnector` attached to it. This is a sample implementation to connect as a server-worker.
+* `UnityClientConnector`: This is a sample implementation to connect as a client-worker on Windows or MacOS. (Note that the client-worker is sometimes called `UnityClient`.)
+* `UnityGameLogicConnector`: This is a sample implementation to connect as a server-worker.
+* `AndroidClientWorkerConnector`: This is a sample implementation to connect as a client-worker on an Android device.
+* `iOSClientWorkerConnector`: This is a sample implementation to connect as a client-worker on an iOS device.
 
-We provide three sample Scenes:
+We provide five sample Scenes:
 
-* `SampleScene`: This Scene contains both the `ClientWorker` and the `GameLogicWorker` prefabs and starts both workers as soon as you load the scene.
-* `ClientScene`: This Scene contains only the `ClientWorker` prefab which you can use to build your client-worker for cloud deployments.
-* `GameLogicScene`: This Scene contains only the `GameLogicWorker` prefab which you can use to build your server worker for cloud deployments.
-
+* `DevelopmentScene`: This Scene contains both the `ClientWorker` and the `GameLogicWorker` GameObjects and starts both workers as soon as you load the scene.
+* `ClientScene`: This Scene contains only the `ClientWorker` GameObject which you can use to build your client-worker for cloud deployments.
+* `GameLogicScene`: This Scene contains only the `GameLogicWorker` GameObject which you can use to build your server worker for cloud deployments.
+* `AndroidClientScene`: This Scene contains only the `AndroidClient` GameObject which you can use to build your Android client-worker for local and cloud deployments.
+* `iOSClientScene`: This Scene contains only the `iOSClient` GameObject which you can use to build your iOS client-worker for local and cloud deployments.
 
 ## How to create your own WorkerConnector
 You can inherit from the `WorkerConnector` class to create your own connection logic, dependent on the [type of the worker]({{urlRoot}}/content/glossary#worker-types) that you want to create.
@@ -77,12 +79,12 @@ public class ClientWorkerConnector : DefaultWorkerConnector
 
 ## How to modify the connection configuration
 
-When inheriting from the `WorkerConnector`, you can override `GetLocatorConfig` and
+When inheriting from the `WorkerConnector`, you can override `GetAlphaLocatorConfig`, `GetLocatorConfig` and
 `GetReceptionistConfig` to modify the connection configuration used to connect to the
 Locator or Receptionist. See [Connecting to SpatialOS]({{urlRoot}}/content/connecting-to-spatialos) to find out more about the connection flows for client-workers and server-workers.
 
 **Example** </br>
-Override the connection Receptionist connection flow configuration.
+Overriding the Receptionist connection flow configuration.
 
 ```csharp
 protected override ReceptionistConfig GetReceptionistConfig(string workerType)
@@ -96,21 +98,51 @@ protected override ReceptionistConfig GetReceptionistConfig(string workerType)
 }
 ```
 
-## How to decide whether to use the Locator or the Receptionist flow
+## How to decide which connect service to use
 (See [Connecting to SpatialOS]({{urlRoot}}/content/connecting-to-spatialos) to find out more about the connection flows for client-workers and server-workers)
 
 The `WorkerConnector` provides a default implementation to decide which connection
 flow to use based on whether the application is running in the Unity Editor and whether it
-can find a login token. You can change the behavior by overriding the `ShouldUseLocator` method.
+can find a login token. You can change the behavior by overriding the `GetConnectionService` method.
 
 **Example** </br>
-Overriding the Locator connection flow configuration.
+Overriding which connection service to choose.
 
 ```csharp
-protected override bool ShouldUseLocator()
+protected override ConnectionService GetConnectionService()
 {
 	// Your worker will always connect via the Receptionist.
 	// This is the expected behaviour for any server-worker.
-	return false;
+	return ConnectionService.Receptionist;
+}
+```
+
+## How to connect using the development authentication flow
+
+We provide an integration with the [development authentication flow](https://docs.improbable.io/reference/latest/shared/auth/development-authentication) that you can use to connect your workers to a cloud deployment. This is especially important when working with [mobile client-workers]({{urlRoot}}/content/mobile/overview). The `MobileWorkerConnector` already provides an implementation to use the development authentication flow when connecting via the Alpha Locator.
+
+**Example** </br>
+Overriding the Alpha Locator flow configuration to use the development authentication flow.
+
+```csharp
+protected override AlphaLocatorConfig GetAlphaLocatorConfig(string workerType)
+{
+		var pit = GetDevelopmentPlayerIdentityToken(DevelopmentAuthToken, GetPlayerId(), GetDisplayName());
+		var loginTokenDetails = GetDevelopmentLoginTokens(workerType, pit);
+		var loginToken = SelectLoginToken(loginTokenDetails);
+
+		return new AlphaLocatorConfig
+		{
+				LocatorHost = RuntimeConfigDefaults.LocatorHost,
+				LocatorParameters = new Worker.CInterop.Alpha.LocatorParameters
+				{
+						PlayerIdentity = new PlayerIdentityCredentials
+						{
+								PlayerIdentityToken  = pit,
+								LoginToken = loginToken,
+						},
+						UseInsecureConnection = false,
+				}
+		};
 }
 ```
