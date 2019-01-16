@@ -8,6 +8,7 @@
 - Added support for the Alpha Locator flow.
 - Added support for connecting mobile devices to cloud deployments via the anonymous authentication flow.
 - Added option to build workers out via IL2CPP in the cmd.
+- Added `Launch Mobile client` menu to `SpatialOS` menu in Unity Editor.  `Android device` and `iOS device` menu items allow launching corresponding mobile clients to connect to local deployment.
 
 ### Changed
 

@@ -43,6 +43,11 @@ namespace Improbable.Gdk.Mobile
 
         public static Dictionary<string, string> GetiOSArguments()
         {
+            if (Application.isEditor)
+            {
+                return new Dictionary<string, string>();
+            }
+
             try
             {
                 var argumentsEnvVar = System.Environment.GetEnvironmentVariable(LaunchArgumentsEnvKey);
