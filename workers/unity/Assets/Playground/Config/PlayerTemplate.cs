@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using Improbable;
 using Improbable.Gdk.Core;
 using Improbable.Gdk.PlayerLifecycle;
-using Improbable.Gdk.QueryBasedInterest;
 using Improbable.Gdk.TransformSynchronization;
 
 namespace Playground
