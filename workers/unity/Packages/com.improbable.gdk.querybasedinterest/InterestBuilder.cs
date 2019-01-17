@@ -52,9 +52,9 @@ namespace Improbable.Gdk.QueryBasedInterest
             return this;
         }
 
-        public ComponentData Build()
+        public Interest.Snapshot Build()
         {
-            return Interest.Component.CreateSchemaComponentData(interest);
+            return new Interest.Snapshot { ComponentInterest = interest };
         }
     }
 }
