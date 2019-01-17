@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Improbable.Gdk.Core;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Improbable.Gdk.QueryBasedInterest
 {
@@ -105,20 +106,30 @@ namespace Improbable.Gdk.QueryBasedInterest
 
         public static ComponentInterest.QueryConstraint All(params ComponentInterest.QueryConstraint[] constraints)
         {
-            return new ComponentInterest.QueryConstraint
+            if (constraints.Length > 0)
             {
-                AndConstraint = constraints.ToList(),
-                OrConstraint = EmptyList
-            };
+                return new ComponentInterest.QueryConstraint
+                {
+                    AndConstraint = constraints.ToList(),
+                    OrConstraint = EmptyList
+                };
+            }
+
+            return Default();
         }
 
         public static ComponentInterest.QueryConstraint Any(params ComponentInterest.QueryConstraint[] constraints)
         {
-            return new ComponentInterest.QueryConstraint
+            if (constraints.Length > 0)
             {
-                AndConstraint = EmptyList,
-                OrConstraint = constraints.ToList()
-            };
+                return new ComponentInterest.QueryConstraint
+                {
+                    AndConstraint = EmptyList,
+                    OrConstraint = constraints.ToList()
+                };
+            }
+
+            return Default();
         }
     }
 }

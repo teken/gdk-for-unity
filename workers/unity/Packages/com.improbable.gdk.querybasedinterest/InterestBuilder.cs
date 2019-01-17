@@ -21,6 +21,11 @@ namespace Improbable.Gdk.QueryBasedInterest
         public InterestBuilder AddQueries<T>(params ComponentInterest.Query[] interestQueries)
             where T : ISpatialComponentData
         {
+            if (interestQueries.Length == 0)
+            {
+                return this;
+            }
+
             var componentId = Dynamic.GetComponentId<T>();
             if (!interest.ContainsKey(componentId))
             {
