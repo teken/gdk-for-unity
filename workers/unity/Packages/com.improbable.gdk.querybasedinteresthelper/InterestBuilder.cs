@@ -18,13 +18,12 @@ namespace Improbable.Gdk.QueryBasedInterest
             return new InterestBuilder();
         }
 
-        public InterestBuilder AddQueries<T>(params ComponentInterest.Query[] interestQueries)
+        public InterestBuilder AddQueries<T>(ComponentInterest.Query query,
+            params ComponentInterest.Query[] queries)
             where T : ISpatialComponentData
         {
-            if (interestQueries.Length == 0)
-            {
-                return this;
-            }
+            var interestQueries = new List<ComponentInterest.Query>(queries.Length + 1) {query};
+            interestQueries.AddRange(queries);
 
             var componentId = Dynamic.GetComponentId<T>();
             if (!interest.ContainsKey(componentId))
@@ -37,23 +36,6 @@ namespace Improbable.Gdk.QueryBasedInterest
             }
 
             interest[componentId].Queries.AddRange(interestQueries);
-            return this;
-        }
-
-        public InterestBuilder AddQuery<T>(ComponentInterest.Query interestQuery)
-            where T : ISpatialComponentData
-        {
-            var componentId = Dynamic.GetComponentId<T>();
-            if (!interest.ContainsKey(componentId))
-            {
-                interest.Add(componentId, new ComponentInterest
-                {
-                    Queries = new List<ComponentInterest.Query> { interestQuery }
-                });
-                return this;
-            }
-
-            interest[componentId].Queries.Add(interestQuery);
             return this;
         }
 

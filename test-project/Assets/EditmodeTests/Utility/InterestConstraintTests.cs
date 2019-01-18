@@ -21,27 +21,11 @@ namespace Improbable.Gdk.EditmodeTests.Utility
         }
 
         [Test]
-        public void All_constraint_with_no_params_sets_AndOr_constraints_to_empty_list()
-        {
-            var constraint = Constraint.All();
-            Assert.AreEqual(0, constraint.AndConstraint.Count);
-            Assert.AreEqual(0, constraint.OrConstraint.Count);
-        }
-
-        [Test]
         public void Any_constraint_sets_AndConstraint_to_empty_list()
         {
             var constraint = Constraint.Any(BasicConstraint);
             Assert.AreEqual(0, constraint.AndConstraint.Count);
             Assert.Greater(constraint.OrConstraint.Count, 0);
-        }
-
-        [Test]
-        public void Any_constraint_with_no_params_sets_AndOr_constraints_to_empty_list()
-        {
-            var constraint = Constraint.Any();
-            Assert.AreEqual(0, constraint.AndConstraint.Count);
-            Assert.AreEqual(0, constraint.OrConstraint.Count);
         }
 
         [Test]

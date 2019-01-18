@@ -11,10 +11,10 @@ namespace Improbable.Gdk.EditmodeTests.Utility
         private static InterestBuilder BasicInterest => InterestBuilder.Begin();
 
         [Test]
-        public void AddQueries_can_be_called_after_AddQuery()
+        public void AddQueries_can_be_called_multiple_times_on_same_component()
         {
             Assert.DoesNotThrow(() => BasicInterest
-                .AddQuery<Position.Component>(BasicQuery)
+                .AddQueries<Position.Component>(BasicQuery, BasicQuery)
                 .AddQueries<Position.Component>(BasicQuery, BasicQuery));
         }
 
@@ -23,30 +23,14 @@ namespace Improbable.Gdk.EditmodeTests.Utility
         {
             Assert.DoesNotThrow(() => BasicInterest
                 .AddQueries<Position.Component>(BasicQuery, BasicQuery)
-                .AddQueries<Position.Component>(BasicQuery, BasicQuery));
+                .AddQueries<Metadata.Component>(BasicQuery, BasicQuery));
         }
 
         [Test]
-        public void AddQuery_can_be_called_after_AddQueries()
+        public void AddQueries_can_be_called_with_a_single_query()
         {
             Assert.DoesNotThrow(() => BasicInterest
-                .AddQueries<Position.Component>(BasicQuery, BasicQuery)
-                .AddQuery<Position.Component>(BasicQuery));
-        }
-
-        [Test]
-        public void AddQuery_can_be_called_after_AddQuery()
-        {
-            Assert.DoesNotThrow(() => BasicInterest
-                .AddQuery<Position.Component>(BasicQuery)
-                .AddQuery<Position.Component>(BasicQuery));
-        }
-
-        [Test]
-        public void AddQueries_should_not_change_dictionary_if_no_queries_given()
-        {
-            var interest = BasicInterest.AddQueries<Position.Component>().Build();
-            Assert.AreEqual(0, interest.ComponentInterest.Count);
+                .AddQueries<Position.Component>(BasicQuery));
         }
 
         [Test]
