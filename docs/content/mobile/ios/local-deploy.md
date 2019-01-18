@@ -69,7 +69,7 @@ You need the Unity Remote app for this. See the [Unity documentation](https://do
       
       Or:
   
-      * In your Unity Editor, navigate to: **SpatialOS** > **Launch Mobile Client** > **iOS Client** and launch mobile client with IP address field prefilled. (It's prefilled with a value from **SpatialOS** > **GDK Tools Configuration** > **Runtime IP for local deployment**.)
+      * In your Unity Editor, navigate to: **SpatialOS** > **Launch Mobile Client** > **iOS Client** to launch the iOS client with the IP address field prefilled. (It's prefilled with the value you entered in the GDK Tools Configuration Window. You can access this by navigating to **SpatialOS** > **GDK Tools Configuration** > **Runtime IP for local deployment** in the Unity Editor.)
   
       > To use this workflow you need to have [ideviceinstaller](https://github.com/libimobiledevice/ideviceinstaller) and [idevicedebug](https://helpmanual.io/help/idevicedebug/) tools installed.
       >
