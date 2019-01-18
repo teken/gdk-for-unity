@@ -14,8 +14,8 @@ namespace Improbable.Gdk.EditmodeTests.Utility
         public void AddQueries_can_be_called_after_AddQuery()
         {
             Assert.DoesNotThrow(() => BasicInterest
-                    .AddQuery<Position.Component>(BasicQuery)
-                    .AddQueries<Position.Component>(BasicQuery, BasicQuery));
+                .AddQuery<Position.Component>(BasicQuery)
+                .AddQueries<Position.Component>(BasicQuery, BasicQuery));
         }
 
         [Test]
