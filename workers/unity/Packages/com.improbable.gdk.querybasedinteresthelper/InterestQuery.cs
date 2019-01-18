@@ -22,13 +22,13 @@ namespace Improbable.Gdk.QueryBasedInterest
             return interest;
         }
 
-        public InterestQuery MaxFrequencyHz(float frequency)
+        public InterestQuery WithMaxFrequencyHz(float frequency)
         {
             query.Frequency = frequency;
             return this;
         }
 
-        public ComponentInterest.Query Filter(params uint[] resultComponentIds)
+        public ComponentInterest.Query FilterResults(params uint[] resultComponentIds)
         {
             if (resultComponentIds.Length > 0)
             {

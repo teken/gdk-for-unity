@@ -106,30 +106,20 @@ namespace Improbable.Gdk.QueryBasedInterest
 
         public static ComponentInterest.QueryConstraint All(params ComponentInterest.QueryConstraint[] constraints)
         {
-            if (constraints.Length > 0)
+            return new ComponentInterest.QueryConstraint
             {
-                return new ComponentInterest.QueryConstraint
-                {
-                    AndConstraint = constraints.ToList(),
-                    OrConstraint = EmptyList
-                };
-            }
-
-            return Default();
+                AndConstraint = constraints.ToList(),
+                OrConstraint = EmptyList
+            };
         }
 
         public static ComponentInterest.QueryConstraint Any(params ComponentInterest.QueryConstraint[] constraints)
         {
-            if (constraints.Length > 0)
+            return new ComponentInterest.QueryConstraint
             {
-                return new ComponentInterest.QueryConstraint
-                {
-                    AndConstraint = EmptyList,
-                    OrConstraint = constraints.ToList()
-                };
-            }
-
-            return Default();
+                AndConstraint = EmptyList,
+                OrConstraint = constraints.ToList()
+            };
         }
     }
 }
