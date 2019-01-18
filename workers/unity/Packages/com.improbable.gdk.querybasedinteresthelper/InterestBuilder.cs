@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using Improbable.Gdk.Core;
-using Improbable.Worker.CInterop;
 
 namespace Improbable.Gdk.QueryBasedInterest
 {
+
     public class InterestBuilder
     {
         private readonly Dictionary<uint, ComponentInterest> interest;
@@ -13,11 +13,35 @@ namespace Improbable.Gdk.QueryBasedInterest
             interest = new Dictionary<uint, ComponentInterest>();
         }
 
+        /// <summary>
+        ///     Creates a new InterestBuilder object.
+        /// </summary>
+        /// <returns>
+        ///     A new InterestBuilder object.
+        /// </returns>
         public static InterestBuilder Begin()
         {
             return new InterestBuilder();
         }
 
+        /// <summary>
+        ///     Add queries to the Interest component.
+        /// </summary>
+        /// <param name="query">
+        ///     First query to add for a given authoritative component.
+        /// </param>
+        /// <param name="queries">
+        ///     Further queries to add for a given authoritative component.
+        /// </param>
+        /// <typeparam name="T">
+        ///     Type of the authoritative component to add the queries to.
+        /// </typeparam>
+        /// <remarks>
+        ///     At least one query must be provided to update the Interest component.
+        /// </remarks>
+        /// <returns>
+        ///     An InterestBuilder object.
+        /// </returns>
         public InterestBuilder AddQueries<T>(ComponentInterest.Query query,
             params ComponentInterest.Query[] queries)
             where T : ISpatialComponentData
@@ -39,6 +63,12 @@ namespace Improbable.Gdk.QueryBasedInterest
             return this;
         }
 
+        /// <summary>
+        ///     Builds the Interest snapshot.
+        /// </summary>
+        /// <returns>
+        ///     A Interest.Snapshot object.
+        /// </returns>
         public Interest.Snapshot Build()
         {
             return new Interest.Snapshot { ComponentInterest = interest };

@@ -69,6 +69,14 @@ namespace Improbable.Gdk.EditmodeTests.Utility
         }
 
         [Test]
+        public void RelativeBox_constraint_sets_AndOr_constraints_to_empty_list()
+        {
+            var constraint = Constraint.RelativeBox(Distance, Distance, Distance);
+            Assert.AreEqual(0, constraint.AndConstraint.Count);
+            Assert.AreEqual(0, constraint.OrConstraint.Count);
+        }
+
+        [Test]
         public void EntityId_constraint_sets_AndOr_constraints_to_empty_list()
         {
             var constraint = Constraint.EntityId(new EntityId(10));
